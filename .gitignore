@@ -145,7 +145,5 @@ ehthumbs.db
 Thumbs.db
 
 # Project specific
-output/
 _image/
-config/config.yaml
 uv.lock
