@@ -4,8 +4,8 @@ from datetime import datetime
 from rss.service import RSSService
 from rss.models import RSSFeed, RSSItem
 
-
 class TestRSSService:
+    
     """RSS服务单元测试"""
 
     def setup_method(self):
