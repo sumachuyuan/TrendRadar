@@ -72,6 +72,10 @@ def load_config():
     config = {
         "VERSION_CHECK_URL": config_data["app"]["version_check_url"],
         "SHOW_VERSION_UPDATE": config_data["app"]["show_version_update"],
+        "ENABLE_RSS": os.environ.get("ENABLE_RSS", "").strip().lower()
+        in ("true", "1")
+        if os.environ.get("ENABLE_RSS", "").strip()
+        else config_data["app"].get("enable_rss", True),
         "REQUEST_INTERVAL": config_data["crawler"]["request_interval"],
         "REPORT_MODE": os.environ.get("REPORT_MODE", "").strip()
         or config_data["report"]["mode"],
@@ -4418,8 +4422,10 @@ class NewsAnalyzer:
         self.data_fetcher = DataFetcher(self.proxy_url)
         
         # 初始化RSS服务
-        from rss.service import RSSService
-        self.rss_service = RSSService()
+        self.rss_service = None
+        if CONFIG["ENABLE_RSS"]:
+            from rss.service import RSSService
+            self.rss_service = RSSService()
 
         if self.is_github_actions:
             self._check_version_update()
@@ -4818,12 +4824,15 @@ class NewsAnalyzer:
                 print(f"HTML报告已生成: {html_file}")
                 
                 # 生成并保存RSS内容
-                try:
-                    # 使用原始数据生成RSS，不进行关键字过滤
-                    saved_rss_files = self.rss_service.generate_and_save_rss(all_results, combined_id_to_name, use_raw_data=True)
-                    print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
-                except Exception as e:
-                    print(f"生成RSS内容时出错: {e}")
+                if CONFIG["ENABLE_RSS"]:
+                    try:
+                        # 使用原始数据生成RSS，不进行关键字过滤
+                        saved_rss_files = self.rss_service.generate_and_save_rss(all_results, combined_id_to_name, use_raw_data=True)
+                        print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
+                    except Exception as e:
+                        print(f"生成RSS内容时出错: {e}")
+                else:
+                    print("RSS功能已禁用，跳过RSS生成")
 
                 # 发送实时通知（使用完整历史数据的统计结果）
                 summary_html = None
@@ -4855,12 +4864,15 @@ class NewsAnalyzer:
             print(f"HTML报告已生成: {html_file}")
             
             # 生成并保存RSS内容
-            try:
-                # 使用原始数据生成RSS，不进行关键字过滤
-                saved_rss_files = self.rss_service.generate_and_save_rss(results, id_to_name, use_raw_data=True)
-                print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
-            except Exception as e:
-                print(f"生成RSS内容时出错: {e}")
+            if CONFIG["ENABLE_RSS"]:
+                try:
+                    # 使用原始数据生成RSS，不进行关键字过滤
+                    saved_rss_files = self.rss_service.generate_and_save_rss(results, id_to_name, use_raw_data=True)
+                    print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
+                except Exception as e:
+                    print(f"生成RSS内容时出错: {e}")
+            else:
+                print("RSS功能已禁用，跳过RSS生成")
 
             # 发送实时通知（如果需要）
             summary_html = None
