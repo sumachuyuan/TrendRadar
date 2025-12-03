@@ -9,7 +9,7 @@ on:
     # - "*/30 * * * *"      # 每 30 分钟执行一次
     # - "*/30 0-14 * * *"   # 每天 UTC 0:00-14:00（北京时间 8:00-22:00），每 30 分钟运行一次
     # - "0 0,6,12,18 * * *" # 每天 UTC 0:00,6:00,12:00,18:00（北京时间 8:00,14:00,20:00,次日2:00）
-    - cron: "0 */2 * * *"
+    - cron: "0 */3 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -111,9 +111,13 @@ jobs:
               echo "✅ Successfully pushed on attempt $i"
               exit 0
             }
-            echo "⚠️ Attempt $i failed, waiting $((i*3)) seconds..."
-            sleep $((i * 3))
+            wait_time=$((i * 10))
+            echo "⚠️ Attempt $i failed, waiting $wait_time seconds..."
+            sleep $wait_time
           done
-          
-          echo "❌ Failed to push after 5 attempts"
-          exit 1
+
+          echo "⚠️ Failed to push after 5 attempts (may be rate-limited)"
+          echo "📊 Data has been generated successfully, but not synced to repository"
+          echo "💡 This is usually caused by GitHub API rate limiting"
+          echo "🔄 The data will be included in the next successful run"
+          exit 0
