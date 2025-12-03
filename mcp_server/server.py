@@ -15,6 +15,7 @@ from .tools.analytics import AnalyticsTools
 from .tools.search_tools import SearchTools
 from .tools.config_mgmt import ConfigManagementTools
 from .tools.system import SystemManagementTools
+from .tools.rss_tools import RssTools
 from .utils.date_parser import DateParser
 from .utils.errors import MCPError
 
@@ -34,8 +35,85 @@ def _get_tools(project_root: Optional[str] = None):
         _tools_instances['search'] = SearchTools(project_root)
         _tools_instances['config'] = ConfigManagementTools(project_root)
         _tools_instances['system'] = SystemManagementTools(project_root)
+        _tools_instances['rss'] = RssTools(project_root)
     return _tools_instances
 
+
+# ==================== RSS相关工具 =====================
+
+@mcp.tool
+async def get_rss_subscriptions() -> str:
+    """
+    获取所有RSS订阅列表
+    
+    Returns:
+        JSON格式的RSS订阅列表，包含标题、链接、描述等信息
+    
+    Example:
+        >>> await get_rss_subscriptions()
+        {"subscriptions": [{"keyword": "AI", "title": "TrendRadar - AI", ...}], "total": 10, "success": true}
+    """
+    tools = _get_tools()
+    result = tools['rss'].get_rss_subscriptions()
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+@mcp.tool
+async def get_rss_by_keyword(
+    keyword: str
+) -> str:
+    """
+    获取特定关键词的RSS内容
+    
+    Args:
+        keyword: 关键词，如 'AI' 或 'all'（获取所有内容）
+    
+    Returns:
+        JSON格式的RSS内容，包含XML字符串
+    
+    Example:
+        >>> await get_rss_by_keyword("AI")
+        {"keyword": "AI", "rss_content": "<?xml version=\"1.0\"?>...", "success": true}
+    """
+    tools = _get_tools()
+    result = tools['rss'].get_rss_by_keyword(keyword)
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+@mcp.tool
+async def get_rss_statistics() -> str:
+    """
+    获取RSS统计信息
+    
+    Returns:
+        JSON格式的RSS统计数据，包含订阅数量、总大小等
+    
+    Example:
+        >>> await get_rss_statistics()
+        {"total_subscriptions": 10, "total_size": 102400, "available_keywords": ["AI", "tech"], "success": true}
+    """
+    tools = _get_tools()
+    result = tools['rss'].get_rss_statistics()
+    return json.dumps(result, ensure_ascii=False, indent=2)
+
+@mcp.tool
+async def get_rss_history(
+    keyword: str
+) -> str:
+    """
+    获取RSS历史记录
+    
+    Args:
+        keyword: 关键词，如 'AI' 或 'all'
+    
+    Returns:
+        JSON格式的RSS历史记录，包含文件名、路径、大小等信息
+    
+    Example:
+        >>> await get_rss_history("AI")
+        {"keyword": "AI", "history": [{"filename": "AI.txt", "path": "output/txt/rss/AI.txt", ...}], "total": 1, "success": true}
+    """
+    tools = _get_tools()
+    result = tools['rss'].get_rss_history(keyword)
+    return json.dumps(result, ensure_ascii=False, indent=2)
 
 # ==================== 日期解析工具（优先调用）====================
 

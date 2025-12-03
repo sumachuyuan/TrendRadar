@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>TrendRadar热点分析</title>
+    <link>https://trendradar.example.com</link>
+    <description>TrendRadar智能新闻聚合和监控系统生成的RSS Feed</description>
+    <language>zh-CN</language>
+    <pubDate>Wed, 03 Dec 2025 10:30:50 GMT</pubDate>
+    <lastBuildDate>Wed, 03 Dec 2025 10:30:50 GMT</lastBuildDate>
+    <generator>TrendRadar RSS Generator</generator>
+  </channel>
+</rss>

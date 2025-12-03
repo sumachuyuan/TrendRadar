@@ -4416,6 +4416,10 @@ class NewsAnalyzer:
         self.proxy_url = None
         self._setup_proxy()
         self.data_fetcher = DataFetcher(self.proxy_url)
+        
+        # 初始化RSS服务
+        from rss.service import RSSService
+        self.rss_service = RSSService()
 
         if self.is_github_actions:
             self._check_version_update()
@@ -4812,6 +4816,14 @@ class NewsAnalyzer:
                 combined_id_to_name = {**historical_id_to_name, **id_to_name}
 
                 print(f"HTML报告已生成: {html_file}")
+                
+                # 生成并保存RSS内容
+                try:
+                    # 使用原始数据生成RSS，不进行关键字过滤
+                    saved_rss_files = self.rss_service.generate_and_save_rss(all_results, combined_id_to_name, use_raw_data=True)
+                    print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
+                except Exception as e:
+                    print(f"生成RSS内容时出错: {e}")
 
                 # 发送实时通知（使用完整历史数据的统计结果）
                 summary_html = None
@@ -4841,6 +4853,14 @@ class NewsAnalyzer:
                 failed_ids=failed_ids,
             )
             print(f"HTML报告已生成: {html_file}")
+            
+            # 生成并保存RSS内容
+            try:
+                # 使用原始数据生成RSS，不进行关键字过滤
+                saved_rss_files = self.rss_service.generate_and_save_rss(results, id_to_name, use_raw_data=True)
+                print(f"RSS内容已生成并保存: {', '.join(saved_rss_files.values())}")
+            except Exception as e:
+                print(f"生成RSS内容时出错: {e}")
 
             # 发送实时通知（如果需要）
             summary_html = None
